@@ -92,27 +92,32 @@ async def create_books(book_data: BookCreate, db: Session = Depends(get_db)):
         return {"success": False, "error": str(e)}
 
 
+class PatchReadingStatusRequest(PydanticBaseModel):
+    reading_status: str
+    book_id: int
+
+
 @api_router.patch("/books/{book_id}", response_model=dict)
-async def update_reading_status(book_id: int, reading_status: str, db: Session = Depends(get_db)):
+async def update_reading_status(request_data: PatchReadingStatusRequest, db: Session = Depends(get_db)):
     delete_stmt = text("DELETE FROM book WHERE id = :book_id")
 
     db.execute(delete_stmt, {"book_id": 1})
     db.commit()
-    current_reading_status = db.scalar(text(" SELECT reading_status FROM user_tracking WHERE book_id = :book_id AND user_id = 1"), {"book_id": book_id})
+    current_reading_status = db.scalar(text(" SELECT reading_status FROM user_tracking WHERE book_id = :book_id AND user_id = 1"), {"book_id": request_data.book_id})
     allowed_statuses_transitions = {
         ReadingStatusEnum.want_to_read.value: [ReadingStatusEnum.reading.value, ReadingStatusEnum.finished.value],
         ReadingStatusEnum.reading.value: [ReadingStatusEnum.finished.value],
     }
-    print(current_reading_status, allowed_statuses_transitions.get(current_reading_status, []), reading_status)
+    print(current_reading_status, allowed_statuses_transitions.get(current_reading_status, []), request_data.reading_status)
     if not current_reading_status:
         return {"success": False, "error": "No current reading status found for the book."}
     
-    if not allowed_statuses_transitions.get(current_reading_status, []) or reading_status not in allowed_statuses_transitions[current_reading_status]:
-        return {"success": False, "error": f"Invalid status transition from {current_reading_status} to {reading_status}"}
+    if not allowed_statuses_transitions.get(current_reading_status, []) or request_data.reading_status not in allowed_statuses_transitions[current_reading_status]:
+        return {"success": False, "error": f"Invalid status transition from {current_reading_status} to {request_data.reading_status}"}
 
     try:
         stmt = text("UPDATE user_tracking SET reading_status = :reading_status WHERE book_id = :book_id AND user_id = 1")
-        db.execute(stmt, {"reading_status": reading_status, "book_id": book_id})
+        db.execute(stmt, {"reading_status": request_data.reading_status, "book_id": request_data.book_id})
         db.commit()
     except Exception as e:
         db.rollback()
