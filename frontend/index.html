@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Dashboard</title>
+
+    <link rel="stylesheet" href="./css/main.css" />
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <h1>Library Dashboard</h1>
+
+            <ul class="nav-links">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Books</a></li>
+                <li><a href="#">Authors</a></li>
+                <li><a href="#">Genres</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="dashboard">
+        <section class="search-section">
+            <input type="text" placeholder="Search..." />
+            <button class="search-button">Search</button>
+        </section>
+
+        <section class="table-section">
+            <table class="books-table">
+                <thead>
+                    <tr>
+                        <th>ISBN</th>
+                        <th>Book Title</th>
+                        <th>Author Name</th>
+                        <th>Publisher Name</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="6">Search for books to display results here.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>2026 Library Dashboard</p>
+    </footer>
+    <script src="./js/main.js"></script>
+</body>
+</html>

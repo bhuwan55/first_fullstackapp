@@ -1,0 +1,43 @@
+@startuml DBdesign
+class Book {
+    Title: String
+    ISBN: String
+}
+
+class Author {
+    Name: String
+}
+
+class Publisher {
+    company_name: String
+}
+
+class City {
+    name: String
+    postcode: String
+}
+
+class ReadingStatusEnum {
+    WANT_TO_READ
+    READING
+    FINISHED
+}
+class User {
+    Name: String
+    Email: String
+}
+
+class UserTracking{
+    user_id: Int
+    book_id: Int
+    started_at: Date
+    reading_status: ReadingStatusEnum
+    (user_id, book_id) unique
+}
+
+Book "1..*" -- "1..*" Author
+Publisher "1" -- "0..*" Book
+User "1" -- "0..*" UserTracking
+Book "1" -- "0..*" UserTracking
+City "1" -- "0..*" Publisher
+@enduml
