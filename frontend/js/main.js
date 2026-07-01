@@ -1,6 +1,7 @@
 let currentBooks = [];
 const searchInput = document.querySelector('.search-section input');
 const searchButton = document.querySelector('.search-button');
+const loadingSpinner = document.querySelector('.loading-spinner');
 
 const STATUS_LABELS = {
   want_to_read: "Want To Read",
@@ -34,6 +35,8 @@ searchButton.addEventListener('click', async () => {
         return;
     }
 
+    searchButton.classList.add('loading');
+
     try {
         const response = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}`);
         const data = await response.json();
@@ -52,6 +55,7 @@ searchButton.addEventListener('click', async () => {
     } catch (error) {
         console.error('Error fetching search results:', error);
     }
+    searchButton.classList.remove('loading');
 });
 
 
