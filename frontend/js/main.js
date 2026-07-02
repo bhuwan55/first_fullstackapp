@@ -15,9 +15,9 @@ async function loadBooksFromBackend() {
     console.log(data);
     
     currentBooks = data;
-    renderBooks(data)
-
+    renderBooks(data);
 }
+
 
 
 window.addEventListener('DOMContentLoaded', (loadBooksFromBackend))
@@ -26,12 +26,12 @@ window.addEventListener('DOMContentLoaded', (loadBooksFromBackend))
 searchButton.addEventListener('click', async () => {
     const query = searchInput.value.trim();
     if (!query){
-        alert('Please enter a search term.');
+        showToast('Please enter a search term.', 'error');
         return;
     }
 
     if (query.length < 3){
-        alert('Please enter at least 3 characters for the search term.');
+        showToast('Please enter at least 3 characters for the search term.', 'error');
         return;
     }
 
@@ -53,7 +53,7 @@ searchButton.addEventListener('click', async () => {
         currentBooks = books;
         renderBooks(books, true);
     } catch (error) {
-        console.error('Error fetching search results:', error);
+        showToast('Error fetching search results.', 'error');
     }
     searchButton.classList.remove('loading');
 });
@@ -72,7 +72,7 @@ function renderBooks(books, show_action=false) {
             <td>${book.publisher_name}</td>
             <td>${book.started_at}</td>
             ${show_action ? 
-                `<td><button class="add-button" data-isbn="${book.isbn}">Add to Wishlist</button></td>` :
+                `<td><button class="add-button" data-isbn="${book.isbn}" type="button">Add to Wishlist</button></td>` :
                  `<td>
                     <select class="status-select" data-isbn="${book.isbn}">
                         <option value="want_to_read" ${book.reading_status === 'want_to_read' ? 'selected' : ''}>${STATUS_LABELS.want_to_read}</option>
@@ -91,7 +91,8 @@ tableBody.addEventListener('click', async(event) =>
     { if (!event.target.classList.contains('add-button'))
          { return; } 
     const isbn = event.target.dataset.isbn; 
-    console.log(isbn); 
+    event.preventDefault();
+    console.log(isbn);
 
     book = currentBooks.filter(book => book.isbn === isbn)[0];
 
@@ -112,9 +113,9 @@ tableBody.addEventListener('click', async(event) =>
         const data = await response.json();
         console.log(data);
         if (data.success) {
-            alert('Book added!');
+            sessionStorage.setItem('toastData', JSON.stringify({ message: 'Book added successfully!', type: 'success' }));
         } else {
-            alert(data.error);
+            sessionStorage.setItem('toastData', JSON.stringify({ message: data.error, type: 'error' }));
         }
     } catch (error) {
         console.error(error);
@@ -130,7 +131,7 @@ function validateStatusTransition(currentStatus, newStatus) {
     };
 
     if (!allowedTransitions[currentStatus].includes(newStatus)) {
-        alert(`Invalid status transition from ${currentStatus} to ${newStatus}`);
+        showToast(`Invalid status transition from ${currentStatus} to ${newStatus}`, 'error');
         throw new Error(`Invalid status transition from ${currentStatus} to ${newStatus}`);
     }
 };
@@ -168,11 +169,38 @@ tableBody.addEventListener('change', async (event) => {
         const data = await response.json();
         console.log(data);
         if (data.success) {
-            alert('Status updated!');
+            showToast('Status updated successfully!', 'success');
+            sessionStorage.setItem('toastData', JSON.stringify({ message: 'Status updated successfully!', type: 'success' }));
         } else {
-            alert(data.error);
+            sessionStorage.setItem('toastData', JSON.stringify({ message: data.error, type: 'error' }));
         }
     } catch (error) {
         console.error(error);
+    }
+});
+
+
+
+function showToast(message, type = 'success') {
+    const toastContainer = document.querySelector('.toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (sessionStorage.getItem('toastData')) {
+        toastData = JSON.parse(sessionStorage.getItem('toastData'));
+        message = toastData.message;
+        type = toastData.type;
+        showToast(message, type);
+
+        sessionStorage.removeItem('toastData');
     }
 });
